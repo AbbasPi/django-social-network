@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm
 from .models import Message, Room, Topic
-from .forms import RoomForm
+from .forms import RoomForm, UserForm
 
 
 def loginPage(request):
@@ -156,11 +156,23 @@ def deleteRoom(request, pk):
 @login_required(login_url='login')
 def deleteMessage(request, pk):
     message = Message.objects.get(id=pk)
+
     if request.user != message.user:
-        return HttpResponse('You are not allowed to do this')
+        return HttpResponse('Your are not allowed here!!')
+
     if request.method == 'POST':
         message.delete()
         return redirect('home')
+    return render(request, 'base/delete.html', {'obj': message})
 
-    context = {'obj': message}
-    return render(request, 'base/delete.html', context)
+
+@login_required(login_url='login')
+def updateUser(request):
+    user = request.user
+    form = UserForm(instance=user)
+    if request.method == 'POST':
+        form = UserForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('profile', pk=user.id)
+    return render(request, 'base/update_user.html', {'form': form})
