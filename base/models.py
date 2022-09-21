@@ -1,10 +1,22 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.contrib.auth.models import User
+
+
+class User(AbstractUser):
+    name = models.CharField(max_length=255, null=True)
+    email = models.EmailField(max_length=255, unique=True)
+    bio = models.TextField(null=True, blank=True)
+
+    avatar = models.ImageField(null=True, default='avatar.svg')
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
 
 
 class BaseModel(models.Model):
     class Meta:
         abstract = True
+
     created = models.DateTimeField(auto_now_add=True, editable=False)
     updated = models.DateTimeField(auto_now=True, editable=False)
 
